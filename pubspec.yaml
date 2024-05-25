@@ -1,0 +1,42 @@
+name: Jam_Alarm
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_native_splash: ^2.0.6
+  flutter_local_notifications: ^5.0.0+4
+  http: ^0.13.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.9.2
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+
+flutter_native_splash:
+  color: "#42a5f5"
+  image: assets/icons/jam_screen.png
+  android: true
+  ios: true
+  web: true
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/jam_screen.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icons/jam_screen.png"
