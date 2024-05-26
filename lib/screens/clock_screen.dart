@@ -10,12 +10,20 @@ class ClockScreen extends StatefulWidget {
 
 class _ClockScreenState extends State<ClockScreen> {
   late ClockService _clockService;
-  List<String> selectedCountryTimes = [];
+  List<String> selectedTimeZones = [];
 
   @override
   void initState() {
     super.initState();
     _clockService = ClockService();
+    // Initialize time zones here if needed
+    _initializeTimeZones();
+  }
+
+  // Method to initialize time zones
+  void _initializeTimeZones() {
+    // Add default time zones or load from storage if needed
+    selectedTimeZones.addAll(['Asia/Jakarta', 'America/New_York']);
   }
 
   @override
@@ -50,23 +58,28 @@ class _ClockScreenState extends State<ClockScreen> {
                         '${snapshot.data!.dayOfWeek}, ${snapshot.data!.formattedDate}',
                         style: TextStyle(fontSize: 20),
                       ),
-
-                      if (selectedCountryTimes.isNotEmpty) ...selectedCountryTimes.map((time) => 
-                        ListTile(
-                          title: Text(
-                            'Waktu Negara yang Dipilih: $time',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              setState(() {
-                                selectedCountryTimes.remove(time);
-                              });
-                            },
-                          ),
-                        )
-                      ).toList(),
+                      if (selectedTimeZones.isNotEmpty)
+                        ...selectedTimeZones.map((timeZone) {
+                          final timeModel = _clockService.getTimeForTimeZone(timeZone);
+                          return ListTile(
+                            title: Text(
+                              'Waktu di $timeZone: ${timeModel.formattedTime}',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            subtitle: Text(
+                              '${timeModel.dayOfWeek}, ${timeModel.formattedDate}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                setState(() {
+                                  selectedTimeZones.remove(timeZone);
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
                     ],
                   );
                 } else {
@@ -77,7 +90,9 @@ class _ClockScreenState extends State<ClockScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _clockService.updateTime();
+                setState(() {
+                  // This will trigger a rebuild and update the UI
+                });
               },
               child: Text('Perbarui Waktu'),
             ),
@@ -86,13 +101,13 @@ class _ClockScreenState extends State<ClockScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final selectedTime = await Navigator.push(
+          final selectedTimeZone = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SearchTimeScreen()),
           );
-          if (selectedTime != null) {
+          if (selectedTimeZone != null) {
             setState(() {
-              selectedCountryTimes.add(selectedTime);
+              selectedTimeZones.add(selectedTimeZone);
             });
           }
         },

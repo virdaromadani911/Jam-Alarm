@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'dart:async';  // Untuk Timer
 
 class CountdownScreen extends StatefulWidget {
   final int totalSeconds;
+  final String timerName;
 
-  CountdownScreen({required this.totalSeconds});
+  CountdownScreen({required this.totalSeconds, required this.timerName});
 
   @override
   _CountdownScreenState createState() => _CountdownScreenState();
@@ -13,22 +14,24 @@ class CountdownScreen extends StatefulWidget {
 class _CountdownScreenState extends State<CountdownScreen> {
   late int _remainingSeconds;
   late Timer _timer;
-  bool _isRunning = true;
+  bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
     _remainingSeconds = widget.totalSeconds;
-    _startTimer();
+    _startCountdown();
   }
 
-  void _startTimer() {
+  void _startCountdown() {
+    _isRunning = true;
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingSeconds > 0) {
           _remainingSeconds--;
         } else {
           _timer.cancel();
+          _isRunning = false;
         }
       });
     });
@@ -42,19 +45,20 @@ class _CountdownScreenState extends State<CountdownScreen> {
   }
 
   void _resumeTimer() {
-    _startTimer();
-    setState(() {
-      _isRunning = true;
-    });
+    _startCountdown();
   }
 
   void _resetTimer() {
-    _timer.cancel();
+    _stopTimer();
     setState(() {
       _remainingSeconds = widget.totalSeconds;
-      _isRunning = true;
-      _startTimer();
     });
+    _startCountdown();
+  }
+
+  void _deleteTimer() {
+    _stopTimer();
+    Navigator.pop(context);
   }
 
   void _addTime(int seconds) {
@@ -63,10 +67,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
     });
   }
 
-  void _deleteTimer() {
-    _timer.cancel();
-    Navigator.pop(context);
-  }
+  double get progress => _remainingSeconds / widget.totalSeconds;
 
   @override
   void dispose() {
@@ -76,11 +77,9 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double progress = _remainingSeconds / widget.totalSeconds;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Timer'),
+        title: Text(widget.timerName),
       ),
       body: Center(
         child: Column(
@@ -105,10 +104,10 @@ class _CountdownScreenState extends State<CountdownScreen> {
             ),
             SizedBox(height: 20),
             IconButton(
-                  onPressed: _resetTimer,
-                  icon: Icon(Icons.restore),
-                  iconSize: 40,
-                ),
+              onPressed: _resetTimer,
+              icon: Icon(Icons.restore),
+              iconSize: 40,
+            ),
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

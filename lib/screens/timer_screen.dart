@@ -1,58 +1,73 @@
 import 'package:flutter/material.dart';
 import 'countdown_screen.dart';  // Import layar hitungan mundur
 
+class Timer {
+  final String name;
+  final int totalSeconds;
+
+  Timer({required this.name, required this.totalSeconds});
+}
+
 class TimerScreen extends StatefulWidget {
   @override
   _TimerScreenState createState() => _TimerScreenState();
 }
 
 class _TimerScreenState extends State<TimerScreen> {
-  final TextEditingController _hoursController = TextEditingController(text: '00');
-  final TextEditingController _minutesController = TextEditingController(text: '00');
-  final TextEditingController _secondsController = TextEditingController(text: '00');
+  List<Timer> timers = [];
 
-  @override
-  void dispose() {
-    _hoursController.dispose();
-    _minutesController.dispose();
-    _secondsController.dispose();
-    super.dispose();
-  }
-
-  void _startCountdown() {
-    int hours = int.tryParse(_hoursController.text) ?? 0;
-    int minutes = int.tryParse(_minutesController.text) ?? 0;
-    int seconds = int.tryParse(_secondsController.text) ?? 0;
+  void _addTimer(String name, int hours, int minutes, int seconds) {
     int totalSeconds = hours * 3600 + minutes * 60 + seconds;
 
+    setState(() {
+      timers.add(Timer(name: name, totalSeconds: totalSeconds));
+    });
+  }
+
+  void _startCountdown(Timer timer) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CountdownScreen(totalSeconds: totalSeconds),
+        builder: (context) => CountdownScreen(
+          totalSeconds: timer.totalSeconds,
+          timerName: timer.name,
+        ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Set Timer'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+  void _deleteTimer(int index) {
+    setState(() {
+      timers.removeAt(index);
+    });
+  }
+
+  Future<void> _showAddTimerDialog() async {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController hoursController = TextEditingController(text: '00');
+    final TextEditingController minutesController = TextEditingController(text: '00');
+    final TextEditingController secondsController = TextEditingController(text: '00');
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Timer'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Timer Name',
+                  ),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Flexible(
                       child: TextField(
-                        controller: _hoursController,
+                        controller: hoursController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           suffixText: 'hrs',
@@ -62,7 +77,7 @@ class _TimerScreenState extends State<TimerScreen> {
                     SizedBox(width: 10),
                     Flexible(
                       child: TextField(
-                        controller: _minutesController,
+                        controller: minutesController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           suffixText: 'min',
@@ -72,7 +87,7 @@ class _TimerScreenState extends State<TimerScreen> {
                     SizedBox(width: 10),
                     Flexible(
                       child: TextField(
-                        controller: _secondsController,
+                        controller: secondsController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           suffixText: 'sec',
@@ -81,16 +96,62 @@ class _TimerScreenState extends State<TimerScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
               ],
             ),
-            IconButton(
-              onPressed: _startCountdown,
-              icon: Icon(Icons.play_arrow),
-              iconSize: 40,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Add'),
+              onPressed: () {
+                String name = nameController.text;
+                int hours = int.tryParse(hoursController.text) ?? 0;
+                int minutes = int.tryParse(minutesController.text) ?? 0;
+                int seconds = int.tryParse(secondsController.text) ?? 0;
+                _addTimer(name, hours, minutes, seconds);
+                Navigator.of(context).pop();
+              },
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Timers'),
+      ),
+      body: ListView.builder(
+        itemCount: timers.length,
+        itemBuilder: (context, index) {
+          return Dismissible(
+            key: Key(timers[index].name),
+            onDismissed: (direction) {
+              _deleteTimer(index);
+            },
+            background: Container(color: Colors.red),
+            child: ListTile(
+              title: Text(timers[index].name),
+              subtitle: Text('${timers[index].totalSeconds} seconds'),
+              trailing: IconButton(
+                icon: Icon(Icons.play_arrow),
+                onPressed: () => _startCountdown(timers[index]),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddTimerDialog,
+        child: Icon(Icons.add),
       ),
     );
   }

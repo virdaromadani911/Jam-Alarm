@@ -1,7 +1,7 @@
 import '../models/alarm.dart';
 
 class AlarmService {
-  List<Alarm> _alarms = [];
+  final List<Alarm> _alarms = [];
 
   List<Alarm> getAlarms() {
     return _alarms;
@@ -12,8 +12,16 @@ class AlarmService {
   }
 
   void removeAlarm(int index) {
-    if (index >= 0 && index < _alarms.length) {
-      _alarms.removeAt(index);
+    _alarms.removeAt(index);
+  }
+
+  void updateAlarm(Alarm alarm) {
+    for (int i = 0; i < _alarms.length; i++) {
+      if (_alarms[i].time == alarm.time) {
+        _alarms[i] = alarm;
+        break;
+      }
     }
   }
 }
+

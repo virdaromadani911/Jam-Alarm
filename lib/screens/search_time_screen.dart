@@ -1,40 +1,47 @@
 import 'package:flutter/material.dart';
 
-// Model data waktu negara
-class CountryTime {
-  final String country;
-  final String time;
-
-  CountryTime(this.country, this.time);
-}
-
 class SearchTimeScreen extends StatelessWidget {
-  final List<CountryTime> countryTimes = [
-    CountryTime('Indonesia', '10:00:00'),
-    CountryTime('United States', '12:30:45'),
-    CountryTime('United Kingdom', '23:15:20'),
-    // Tambahkan negara dan waktu negara lainnya di sini
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pencarian Waktu'),
+        title: Text('Search Time Zone'),
       ),
-      body: ListView.builder(
-        itemCount: countryTimes.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(
-              '${countryTimes[index].country} - ${countryTimes[index].time}',
-              style: TextStyle(fontSize: 20),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Pilih Zona Waktu',
+              style: TextStyle(fontSize: 24),
             ),
-            onTap: () {
-              Navigator.pop(context, countryTimes[index].time);
-            },
-          );
-        },
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, 'Asia/Jakarta');
+              },
+              child: Text('Asia/Jakarta'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, 'America/New_York');
+              },
+              child: Text('America/New_York'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, 'Europe/London');
+              },
+              child: Text('Europe/London'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, 'Australia/Sydney');
+              },
+              child: Text('Australia/Sydney'),
+            ),
+          ],
+        ),
       ),
     );
   }

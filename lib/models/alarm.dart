@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class Alarm {
-  final TimeOfDay time;
+  TimeOfDay time;
+  bool isActive;
+  List<String> activeDays;
 
-  Alarm(this.time);
+  Alarm({required this.time, this.isActive = false, this.activeDays = const []});
 }
+

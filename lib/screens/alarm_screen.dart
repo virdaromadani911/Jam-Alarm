@@ -12,9 +12,10 @@ class _AlarmScreenState extends State<AlarmScreen> {
   bool isAlarmOn = false; // Tambahkan variabel untuk status alarm
   Set<String> selectedDays = {}; // Tambahkan variabel untuk menyimpan hari alarm yang dipilih
 
-  void _toggleAlarm(bool value) {
+  void _toggleAlarm(Alarm alarm, bool value) {
     setState(() {
-      isAlarmOn = value;
+      alarm.isActive = value;
+      _alarmService.updateAlarm(alarm);
     });
   }
 
@@ -28,8 +29,9 @@ class _AlarmScreenState extends State<AlarmScreen> {
     });
   }
 
-  void _deleteAlarm() {
-    // Implementasi logika penghapusan alarm
+  void _deleteAlarm(int index) {
+    _alarmService.removeAlarm(index);
+    setState(() {}); // Update tampilan setelah menghapus alarm
   }
 
   void _startCountdown() {
@@ -55,15 +57,41 @@ class _AlarmScreenState extends State<AlarmScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Switch(
-                  value: isAlarmOn,
-                  onChanged: _toggleAlarm,
+                  value: alarms[index].isActive,
+                  onChanged: (value) {
+                    _toggleAlarm(alarms[index], value);
+                  },
                 ),
                 IconButton(
-                  onPressed: _deleteAlarm,
+                  onPressed: () => _deleteAlarm(index),
                   icon: Icon(Icons.delete),
                 ),
               ],
             ),
+            onTap: () {
+              // Logika untuk memilih hari alarm
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Pilih Hari'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+                          .map((day) => CheckboxListTile(
+                                title: Text(day),
+                                value: selectedDays.contains(day),
+                                onChanged: (isSelected) {
+                                  _selectDay(day);
+                                  Navigator.of(context).pop();
+                                },
+                              ))
+                          .toList(),
+                    ),
+                  );
+                },
+              );
+            },
           );
         },
       ),
@@ -75,7 +103,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
           );
 
           if (selectedTime != null) {
-            Alarm newAlarm = Alarm(selectedTime);
+            Alarm newAlarm = Alarm(time: selectedTime, isActive: true, activeDays: selectedDays.toList());
             _alarmService.addAlarm(newAlarm);
             setState(() {}); // Update tampilan setelah menambahkan alarm
           }
